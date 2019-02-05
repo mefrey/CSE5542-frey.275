@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="three.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+            document.body.appendChild(renderer.domElement);
+            
+
+            function CreateCube(segments = 1) {
+                var cubeGeometry = new THREE.BoxGeometry(1, 1, 1, segments, segments, segments);
+                var cube = new THREE.Mesh(cubeGeometry);
+                cube.material.wireframe = true;
+                return cube;
+            }
+
+            function CreatePlane(segments = 1) {
+                var planeGeometry = new THREE.PlaneGeometry(1, 1, segments, segments);
+                var plane = new THREE.Mesh(planeGeometry);
+                plane.material.wireframe = true;
+                return plane;
+            }
+
+            function CreateSphere(segments = 8) {
+                var sphereGeometry = new THREE.SphereGeometry(0.5, segments, segments);
+                var sphere = new THREE.Mesh(sphereGeometry);
+                sphere.material.wireframe = true;
+                return sphere;
+            }
+
+            function CreateCylinder(segments = 1) {
+                var cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, segments*8, segments);
+                var cylinder = new THREE.Mesh(cylinderGeometry);
+                cylinder.material.wireframe = true;
+                return cylinder;
+            }
+
+            function CreateCone(segments = 1) {
+                var coneGeometry = new THREE.CylinderGeometry(0, 0.5, 1, segments*8, segments);
+                var cone = new THREE.Mesh(coneGeometry);
+                cone.material.wireframe = true;
+                return cone;
+            }
+
+            var ground = CreatePlane();
+            scene.add(ground);
+            ground.rotateX(1.5708);
+            ground.scale.set(10, 5, 5);
+
+            var foot1 = CreateSphere();
+            scene.add(foot1);
+            foot1.translateY(.5);
+            foot1.translateX(-1);
+
+            var foot2 = CreateSphere();
+            scene.add(foot2);
+            foot2.translateY(.5);
+            foot2.translateX(1);
+
+            var leg1 = CreateCylinder();
+            scene.add(leg1);
+            leg1.translateY(1.5);
+            leg1.translateX(-1);
+
+            var leg2 = CreateCylinder();
+            scene.add(leg2);
+            leg2.translateY(1.5);
+            leg2.translateX(1);
+
+            var body = CreateCube();
+            scene.add(body);
+            body.scale.set(1, 2, 1);
+            body.translateY(3);
+
+            var head = CreateSphere();
+            scene.add(head);
+            head.scale.set(1,1,1);
+            head.translateY(4.5);
+
+            var arm1 = CreateCylinder();
+            scene.add(arm1);
+            arm1.translateY(3.5);
+            arm1.translateX(-1);
+            arm1.rotateZ(1.5708);
+
+            var arm2 = CreateCylinder();
+            scene.add(arm2);
+            arm2.translateY(3.5);
+            arm2.translateX(1);
+            arm2.rotateZ(1.5708);
+
+            var hat = CreateCone();
+            scene.add(hat);
+            hat.translateY(5);
+            hat.translateX(.5);
+            hat.rotateZ(-0.785398);
+
+            camera.position.z = 5;
+            camera.position.y = 5;
+            camera.rotateX(-0.523599);
+
+            renderer.render(scene, camera);
+			
+		</script>
+	</body>
+</html>
