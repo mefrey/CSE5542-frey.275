@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CSE 5542 Program Assignment 2</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+    <body>
+        <script src="three.js"></script>
+        <script>
+            var camera, scene, renderer, scenecenter, stereocam;
+
+            var mouseXPos = 0, mouseYPos = 0;
+
+            //update mouse position when user moves pointer over screen
+            document.addEventListener('mousemove', mousePosition, false);
+
+            initialize();
+            animate();
+
+            function CreateCube(segments = 1) {
+                var cubeGeometry = new THREE.BoxGeometry(1, 1, 1, segments, segments, segments);
+                var cube = new THREE.Mesh(cubeGeometry);
+                return cube;
+            }
+
+            function CreatePlane(segments = 1) {
+                var planeGeometry = new THREE.PlaneGeometry(1, 1, segments, segments);
+                var plane = new THREE.Mesh(planeGeometry);
+                return plane;
+            }
+
+            function CreateSphere(segments = 8) {
+                var sphereGeometry = new THREE.SphereGeometry(0.5, segments, segments);
+                var sphere = new THREE.Mesh(sphereGeometry);
+                return sphere;
+            }
+
+            function CreateCylinder(segments = 1) {
+                var cylinderGeometry = new THREE.CylinderGeometry(0.5, 0.5, 1, segments * 8, segments);
+                var cylinder = new THREE.Mesh(cylinderGeometry);
+                return cylinder;
+            }
+
+            function CreateCone(segments = 1) {
+                var coneGeometry = new THREE.CylinderGeometry(0, 0.5, 1, segments * 8, segments);
+                var cone = new THREE.Mesh(coneGeometry);
+                return cone;
+            }
+
+            //creates and places the bot in the world
+            function createBot() {
+                var ground = CreatePlane();
+                scene.add(ground);
+                ground.rotateX(-1.5708);
+                ground.scale.set(1000, 1000, 1000);
+
+                var foot1 = CreateSphere();
+                scene.add(foot1);
+                foot1.translateY(.5);
+                foot1.translateX(-1);
+
+                var foot2 = CreateSphere();
+                scene.add(foot2);
+                foot2.translateY(.5);
+                foot2.translateX(1);
+
+                var leg1 = CreateCylinder();
+                scene.add(leg1);
+                leg1.translateY(1.5);
+                leg1.translateX(-1);
+
+                var leg2 = CreateCylinder();
+                scene.add(leg2);
+                leg2.translateY(1.5);
+                leg2.translateX(1);
+
+                var body = CreateCube();
+                scene.add(body);
+                body.scale.set(1, 2, 1);
+                body.translateY(3);
+
+                var head = CreateSphere();
+                scene.add(head);
+                head.scale.set(1, 1, 1);
+                head.translateY(4.5);
+
+                var arm1 = CreateCylinder();
+                scene.add(arm1);
+                arm1.translateY(3.5);
+                arm1.translateX(-1);
+                arm1.rotateZ(1.5708);
+
+                var arm2 = CreateCylinder();
+                scene.add(arm2);
+                arm2.translateY(3.5);
+                arm2.translateX(1);
+                arm2.rotateZ(1.5708);
+
+                var hat = CreateCone();
+                scene.add(hat);
+                hat.translateY(5);
+                hat.translateX(.5);
+                hat.rotateZ(-0.785398);
+            }
+
+            function initialize() {
+                //create the camera to view the scene
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1, 1000);
+                //move it away from the bot so that you can view it
+                camera.position.z = 5;
+
+                stereocam = new THREE.StereoCamera();
+
+                //create the scene and save a shifted center vector for camera orientation purposes
+                scene = new THREE.Scene();
+                scenecenter = new THREE.Vector3(scene.position.x, scene.position.y + 2.5, scene.position.z);
+
+                //create the renderer and enable depth testing
+                renderer = new THREE.WebGLRenderer();
+                renderer.context.enable(renderer.context.DEPTH_TEST);
+                document.body.appendChild(renderer.domElement);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setScissorTest(true);
+
+                //create the bot for the scene
+                createBot();
+                
+            }
+
+            //updates a relative position value for the mouse, to use in moving camera
+            function mousePosition(event) {
+                mouseXPos = (event.clientX - (window.innerWidth / 2));
+                mouseYPos = (event.clientY - (window.innerHeight));
+            }
+
+            function animate() {
+
+                requestAnimationFrame(animate);
+
+                render();
+
+            }
+
+            function render() {
+                //set the camera position relative to the position values of the mouse
+                camera.position.x = (mouseXPos - camera.position.x) * .005;
+                camera.position.y = (- mouseYPos - camera.position.y) * .025;
+                //prevent the camera from moving too much in the y direction
+                if (camera.position.y <= 2) {
+                    camera.position.y = 2;
+                }
+                else if (camera.position.y >= 10) {
+                    camera.position.y = 10;
+                }
+                //after moving the camera, have it look at the center of the scene
+                camera.lookAt(scenecenter);
+
+                //render the scene
+                //update the matrix world to ensure the camera's parent isnt null, makes movement smoother
+                if (camera.parent === null) camera.updateMatrixWorld();
+
+                //updates the stereo cam based on the perspective camera data
+                stereocam.update(camera);
+
+                var rSize = renderer.getSize();
+                //set the viewport for the left side of the stereocamera and render
+                renderer.setScissor(0, 0, rSize.width / 2, rSize.height);
+                renderer.setViewport(0, 0, rSize.width / 2, rSize.height);
+                renderer.render(scene, stereocam.cameraL);
+                //set the viewport for the right side of the stereocamera and render
+                renderer.setScissor(rSize.width / 2, 0, rSize.width / 2, rSize.height);
+                renderer.setViewport(rSize.width / 2, 0, rSize.width / 2, rSize.height);
+                renderer.render(scene, stereocam.cameraR);
+            }
+        </script>
+    </body>
+</html>
