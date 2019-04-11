@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CSE 5542 Program Assignment 4</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+    <body>
+        <script src="three.js"></script>
+        <script>
+            var camera, scene, renderer, scenecenter;
+
+            var mouseXPos = 0, mouseYPos = 0;
+
+            //update mouse position when user moves pointer over screen
+            document.addEventListener('mousemove', mousePosition, false);
+
+            initialize();
+
+            var cubeGeo = new THREE.CubeGeometry(5, 5, 5);
+
+            var loader = new THREE.CubeTextureLoader();
+            loader.setPath('img/');
+
+            var textures = loader.load(['tex1.jpg', 'tex2.jpg', 'tex3.jpg', 'tex4.jpg', 'tex5.jpg', 'tex6.jpg']);
+            
+            var material = new THREE.MeshBasicMaterial({ color: 0xffffff, envMap: textures });
+
+            var cube = new THREE.Mesh(cubeGeo, material);
+            scene.add(cube);
+            
+            animate();
+
+            function initialize() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                document.body.appendChild(renderer.domElement);
+                scenecenter = new THREE.Vector3(scene.position.x, scene.position.y, scene.position.z);
+                renderer.context.enable(renderer.context.DEPTH_TEST);
+            }
+
+            //updates a relative position value for the mouse, to use in moving camera
+            function mousePosition(event) {
+                mouseXPos = (event.clientX - (window.innerWidth));
+                mouseYPos = (event.clientY - (window.innerHeight));
+            }
+
+            function animate() {
+
+                requestAnimationFrame(animate);
+
+                render();
+
+            }
+
+            function render() {
+                //set the camera position relative to the position values of the mouse
+                camera.position.x = (mouseXPos - camera.position.x) * .005;
+                camera.position.y = (- mouseYPos - camera.position.y) * .025;
+                //prevent the camera from moving too much in the y direction
+                if (camera.position.y <= 2) {
+                    camera.position.y = 2;
+                }
+                else if (camera.position.y >= 10) {
+                    camera.position.y = 10;
+                }
+                //after moving the camera, have it look at the center of the scene
+                camera.lookAt(scenecenter);
+
+                //render the scene
+                renderer.render(scene, camera);
+            }
+        </script>
+    </body>
+</html>
