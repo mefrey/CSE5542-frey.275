@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Prog 5</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+    <script src="src/three.js"></script>
+    <script src="src/OrbitControls.js"></script>
+    <script>
+        var container;
+        var camera, scene, renderer;
+        init();
+        animate();
+        function init() {
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, .1, 1000);
+            camera.position.z = 4;
+            scene = new THREE.Scene();
+            camera.lookAt(scene.position);
+            //controls
+            var controls = new THREE.OrbitControls(camera);
+            controls.enableZoom = false;
+            controls.enablePan = false;
+            controls.minPolarAngle = Math.PI / 4;
+            controls.maxPolarAngle = Math.PI / 1.5;
+            //cubemap
+            var textures = [
+                "img/right.jpg", "img/left.jpg",
+                "img/top.jpg", "img/bottom.jpg",
+                "img/front.jpg", "img/back.jpg"
+            ];
+            var reflectionCube = new THREE.CubeTextureLoader().load(textures);
+            scene.background = reflectionCube;
+            //cube
+            var texture = new THREE.TextureLoader().load("img/tex.png");
+            var material = new THREE.MeshBasicMaterial({ map: texture });
+            var cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+            scene.add(cube);
+            cube.translateZ(-1);
+            //renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.context.enable(renderer.context.DEPTH_TEST);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+        }
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+    </script>
+
+</body>
+</html>
